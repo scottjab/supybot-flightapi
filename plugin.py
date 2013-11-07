@@ -71,7 +71,7 @@ class Flight(callbacks.Plugin):
         return self._api_request('get', endpoint)
 
     def _api_put_request(self, endpoint, data):
-        return self._api_request('put', endpoint)
+        return self._api_request('put', endpoint, data=data)
 
     def metar(self, irc, msg, args):
         """ Returns the metar for a station """
@@ -95,6 +95,17 @@ class Flight(callbacks.Plugin):
         else:
             irc.reply(self.metar.__doc__)
 
+    def expandroute(self, irc, msg, args):
+        """ This returns the entire flown route """
+        route = ' '.join(args)
+        route = self._api_put_request('/route', data={'route': route})
+        if route is not None:
+            try:
+                irc.reply(route['expanded_route'])
+            except:
+                irc.reply('Unabled to parse route')
+        irc.reply('Unable to parse route')
+
     def apt(self, irc, msg, args):
         """ Returns information about an airport """
         airport = args[0].upper()
@@ -102,9 +113,8 @@ class Flight(callbacks.Plugin):
         metar = self._api_get_request('/longmetar/%s' % (airport, ))
         airport = self._api_get_request('/airport/%s' % (airport, ))
 
-
     def zulu(self, irc, msg, args):
-        irc.reply(time.strftime("%Y-%m-%d %H:%M:%S",time.gmtime()))
+        irc.reply(time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()))
 
 Class = Flight
 
